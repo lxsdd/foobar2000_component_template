@@ -1,0 +1,110 @@
+foobar2000-Komponente aus dem generischen Template erstellen
+============================================================
+
+Diese Anleitung beschreibt den vollständigen Ablauf für ein neues Projekt. Das Template selbst bleibt ein eigenständiges Repository und wird nicht als Arbeitsverzeichnis für die neue Komponente verwendet.
+
+1. PowerShell im Template öffnen
+--------------------------------
+
+```powershell
+Set-Location C:\foobar2000_dev\foobar2000_component_template
+```
+
+2. Neues Projekt erzeugen
+-------------------------
+
+Am zuverlässigsten ist der vollständige, reproduzierbare Aufruf:
+
+```powershell
+.\create_component.ps1 `
+  -ComponentId foo_duplicate_inspector `
+  -DisplayName "Duplicate Inspector" `
+  -Description "Finds potential duplicate tracks in the media library, folders or playlists." `
+  -Destination C:\foobar2000_dev\foo_duplicate_inspector
+```
+
+Für ein anderes Plugin werden alle vier Beispielwerte entsprechend ersetzt.
+
+Regeln für `ComponentId`:
+
+- beginnt mit `foo_`
+- enthält ausschließlich Kleinbuchstaben, Ziffern und Unterstriche
+- muss dauerhaft eindeutig sein
+- Beispiel: `foo_duplicate_inspector`
+
+Alternativ kann nur
+
+```powershell
+.\create_component.ps1
+```
+
+aufgerufen werden. PowerShell fragt dann die vier Pflichtwerte `ComponentId`, `DisplayName`, `Description` und `Destination` nacheinander ab. Der vollständige Aufruf ist vorzuziehen, weil er später eindeutig nachvollziehbar und wiederholbar ist.
+
+Optionale Parameter:
+
+- `-Version 0.1.0`: Startversion; Standard ist `0.1.0`.
+- `-Namespace duplicate_inspector`: C++-Namespace; ohne Angabe wird er aus der Component-ID abgeleitet.
+- `-SkipGitInit`: erzeugt ausnahmsweise kein Git-Repository.
+
+Der Zielordner muss neu oder vollständig leer sein.
+
+3. Was der Generator automatisch erledigt
+------------------------------------------
+
+- kopiert das geprüfte foobar2000-SDK und WTL in das neue Repository
+- erzeugt eine unabhängige Visual-Studio-Projektmappe für Win32 und x64
+- setzt Component-ID, Anzeigename, Beschreibung, Namespace und Version
+- erzeugt neue Projekt-, Solution-, Preferences- und Config-GUIDs
+- integriert Build-, Paketierungs-, DPI- und Dark-Mode-Basis
+- validiert die erzeugte Projektstruktur
+- initialisiert standardmäßig ein Git-Repository mit Branch `main`
+
+Wichtig: Der Generator erstellt bewusst noch keinen Git-Commit. Der erste Commit erfolgt erst nach der Baseline-Prüfung.
+
+4. In das neue Projekt wechseln und Baseline prüfen
+---------------------------------------------------
+
+```powershell
+Set-Location C:\foobar2000_dev\foo_duplicate_inspector
+.\validate_project.ps1
+.\build.bat
+.\pack_component.bat
+```
+
+Erwartete Ergebnisse:
+
+- Win32-DLL unter `build\foo_duplicate_inspector.dll`
+- x64-DLL unter `build\x64\foo_duplicate_inspector.dll`
+- installierbare Komponente unter `build\foo_duplicate_inspector_0.1.0.fb2k-component`
+- `git status --short` zeigt nach dem Build keine neuen Build-Artefakte
+
+5. Neues Codex-Projekt öffnen
+-----------------------------
+
+Jetzt `C:\foobar2000_dev\foo_duplicate_inspector` als eigenen Workspace beziehungsweise als eigenes Codex-Projekt öffnen und dort eine neue Task beginnen. Nicht im Template- oder Smart-Tempo-Projekt weiterarbeiten.
+
+Empfohlener erster Auftrag an Codex:
+
+```text
+Prüfe die frisch aus dem generischen foobar2000-Template erzeugte Baseline.
+Führe validate_project.ps1, den Win32/x64-Release-Build und die Paketierung aus.
+Nimm noch keine fachlichen Änderungen vor. Erstelle anschließend den initialen
+Baseline-Commit und plane mit mir Architektur, Anforderungen und Tests für das Plugin.
+```
+
+6. Empfohlene Entwicklungsreihenfolge
+-------------------------------------
+
+1. Unveränderte Baseline validieren, bauen und paketieren.
+2. Baseline als eigenen Commit sichern.
+3. Fachliche Anforderungen und klare Nicht-Ziele dokumentieren.
+4. Architektur, Datenmodell, UI und Sicherheitsregeln festlegen.
+5. Funktionen in kleinen, testbaren Schritten implementieren.
+6. Vor jedem Release beide Architekturen bauen und die Paketstruktur prüfen.
+
+7. Template später erneut verwenden
+------------------------------------
+
+Für jedes weitere Plugin wird `create_component.ps1` erneut aus dem Template-Verzeichnis aufgerufen. Jedes erzeugte Projekt erhält eigene GUIDs, einen eigenen SDK-/WTL-Stand und eine eigene Git-Historie.
+
+Änderungen an einem bereits erzeugten Projekt werden nicht automatisch aus späteren Template-Verbesserungen übernommen. Allgemeine Template-Korrekturen müssen daher entweder vor der Projekterzeugung vorhanden sein oder gezielt in bestehende Projekte übertragen werden.

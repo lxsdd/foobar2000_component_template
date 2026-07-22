@@ -1,7 +1,9 @@
 .vs/
 build/
 Debug/
+Debug FB2K/
 Release/
+Release FB2K/
 x64/
 *.user
 *.suo
@@ -12,4 +14,3 @@ x64/
 *.sdf
 *.tlog
 *.lastbuildstate
-

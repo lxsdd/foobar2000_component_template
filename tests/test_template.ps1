@@ -43,6 +43,12 @@ try {
     }
 
     if ($Build) {
+        & git -C $first init --initial-branch=main
+        if ($LASTEXITCODE -ne 0) { throw 'Probe git init failed.' }
+        & git -C $first add .
+        if ($LASTEXITCODE -ne 0) { throw 'Probe git add failed.' }
+        $statusBeforeBuild = @(& git -C $first status --porcelain=v1)
+
         Push-Location $first
         try {
             & .\build.bat
@@ -62,6 +68,12 @@ try {
             $unexpectedDll = @($normalizedEntries | Where-Object { $_ -like '*.dll' -and $_ -notin @('foo_template_probe.dll', 'x64/foo_template_probe.dll') })
             if ($unexpectedDll.Count -gt 0) {
                 throw "Probe package contains unexpected DLLs: $($unexpectedDll -join ', ')"
+            }
+
+            $statusAfterBuild = @(& git -C $first status --porcelain=v1)
+            if (($statusAfterBuild -join "`n") -ne ($statusBeforeBuild -join "`n")) {
+                $newStatus = @($statusAfterBuild | Where-Object { $_ -notin $statusBeforeBuild })
+                throw "Build or packaging dirtied the generated worktree: $($newStatus -join ', ')"
             }
         } finally {
             Pop-Location

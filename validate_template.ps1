@@ -23,6 +23,13 @@ foreach ($relative in $required) {
     }
 }
 
+$generatedGitignore = @(Get-Content -LiteralPath (Join-Path $root 'template\.gitignore'))
+foreach ($requiredIgnore in @('Debug FB2K/', 'Release FB2K/')) {
+    if ($requiredIgnore -notin $generatedGitignore) {
+        throw "Generated .gitignore is missing SDK output rule: $requiredIgnore"
+    }
+}
+
 $sdkReadme = Get-Content -LiteralPath (Join-Path $root 'vendor\sdk\sdk-readme.html') -Raw
 if ($sdkReadme -notmatch '2025-03-07') {
     throw 'Unexpected foobar2000 SDK snapshot.'
