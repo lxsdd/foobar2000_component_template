@@ -19,7 +19,7 @@ jobs:
           ./tests/test_template.ps1
           ./create_component.ps1 -ComponentId foo_ci_probe -DisplayName 'CI Probe' -Description 'Cloud template qualification' -Destination ci-probe -SkipGitInit
           foreach($platform in @('Win32','x64')) {
-            & msbuild 'ci-probe/component.sln' /t:Build /p:Configuration=Release /p:Platform=$platform /p:PlatformToolset=v143 /p:LanguageStandard=stdcpplatest /m:2 /verbosity:minimal
+            & msbuild 'ci-probe/component.sln' /t:Build /p:Configuration=Release /p:Platform=$platform /p:PlatformToolset=v145 /p:LanguageStandard=stdcpp23 /m:2 /verbosity:minimal
             if($LASTEXITCODE -ne 0){throw "Build failed: $platform"}
           }
       - name: Package and verify exact candidate
