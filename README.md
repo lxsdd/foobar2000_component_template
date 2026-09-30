@@ -15,6 +15,15 @@ A reusable, validated starting point for native foobar2000 v2.x components on Wi
 
 The template intentionally contains no Smart Tempo code, GUIDs, algorithms, telemetry, UI text or build dependency.
 
+## Relationship to shared infrastructure
+
+This repository is the concrete, buildable generator/template for new foobar2000 components. It intentionally remains separate from `lxsdd/dev-infrastructure`.
+
+- `foobar2000_component_template` owns project generation, GUID isolation, generated solution structure, SDK/WTL snapshot wiring and the disposable dual-architecture probe build.
+- `dev-infrastructure` owns cross-project GitHub-first policy, migration rules, release/candidate invariants and the canonical shared foobar2000 package-verification standard.
+
+Generated product repositories must be standalone: they must not require this template or `dev-infrastructure` at build time. Shared standards may be copied/adapted into generated repositories only where needed for standalone CI, while `dev-infrastructure` remains the policy source of truth.
+
 ## Create a component
 
 ```powershell
