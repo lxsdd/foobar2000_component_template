@@ -1,0 +1,42 @@
+name: Probe official foobar2000 SDK 2026-10-01
+on:
+  pull_request:
+    paths:
+      - 'ci/probe-sdk-2026-10-01.ps1'
+      - '.github/workflows/sdk-2026-10-01.yml'
+      - 'validate_template.ps1'
+      - 'create_component.ps1'
+      - 'template/**'
+      - 'vendor/sdk/**'
+      - '.sdk-2026-10-01.sha256'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sdk-compatibility:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - name: Inspect upstream SDK and compile only when SHA-256 is pinned
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $pinFile = '.sdk-2026-10-01.sha256'
+          if (Test-Path -LiteralPath $pinFile) {
+            $pin = (Get-Content -LiteralPath $pinFile -Raw).Trim()
+            ./ci/probe-sdk-2026-10-01.ps1 -ExpectedSHA256 $pin -Build
+          } else {
+            ./ci/probe-sdk-2026-10-01.ps1
+            Write-Host 'Source discovery only: no compile/SDK qualification without independently checked SHA-256 pin.'
+          }
+      - name: Upload SHA-256 and build gate report (not SDK binaries)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: foobar2000-sdk-2026-10-01-provenance
+          path: sdk-probe-evidence/report.txt
+          retention-days: 14
+          if-no-files-found: warn
