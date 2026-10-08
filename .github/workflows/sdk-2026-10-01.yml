@@ -20,17 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
-      - name: Compare official SDK against pinned unmodified mirror, then compile
+      - name: Validate pinned official SDK archive and compile
         shell: pwsh
         run: |
           $ErrorActionPreference = 'Stop'
           $pinFile = '.sdk-2026-10-01.sha256'
           if (Test-Path -LiteralPath $pinFile) {
             $pin = (Get-Content -LiteralPath $pinFile -Raw).Trim()
-            ./ci/probe-sdk-2026-10-01.ps1 -ExpectedSHA256 $pin -VerifyMirror -Build
+            ./ci/probe-sdk-2026-10-01.ps1 -ExpectedSHA256 $pin -Build
           } else {
-            ./ci/probe-sdk-2026-10-01.ps1 -VerifyMirror -Build
-            Write-Host 'Archive SHA-256 is recorded in evidence; source files were compared byte-for-byte with pinned GitHub mirror before build.'
+            throw 'Missing official SDK archive SHA-256 pin: .sdk-2026-10-01.sha256'
           }
       - name: Upload SHA-256 and build gate report (not SDK binaries)
         if: always()
