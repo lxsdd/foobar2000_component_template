@@ -11,7 +11,7 @@ This project was generated from the reusable foobar2000 Component Template.
 - Visual Studio with MSVC toolset v145 and the Windows 10/11 SDK
 - PowerShell 7 or Windows PowerShell 5.1
 
-The repository vendors foobar2000 SDK 2025-03-07 and WTL, so no paths to another component repository are required.
+The repository vendors foobar2000 SDK 2026-10-01 and WTL, so no paths to another component repository are required.
 
 ## Build
 

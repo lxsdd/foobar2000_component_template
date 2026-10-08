@@ -4,7 +4,7 @@ A reusable, validated starting point for native foobar2000 v2.x components on Wi
 
 ## Baseline
 
-- foobar2000 SDK 2025-03-07, vendored per generated repository
+- foobar2000 SDK 2026-10-01, vendored per generated repository
 - WTL, vendored per generated repository
 - Visual Studio/MSBuild with toolset v145
 - C++23 for component code; SDK projects retain their upstream settings

@@ -37,7 +37,7 @@ if (-not $sdkVersionMatch.Success) {
 }
 $sdkVersion = $sdkVersionMatch.Groups[1].Value
 # Pin the actual vendored snapshot, not a claimed version in documentation.
-$expectedSdkVersion = '2025-03-07'
+$expectedSdkVersion = '2026-10-01'
 if ($sdkVersion -ne $expectedSdkVersion) {
     throw "Unexpected foobar2000 SDK snapshot: $sdkVersion (expected $expectedSdkVersion)."
 }

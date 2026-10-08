@@ -125,17 +125,21 @@ try {
             foreach ($relative in $docs) {
                 $path = Join-Path $workspace $relative
                 $original = Get-Content -LiteralPath $path -Raw
-                if (-not $original.Contains('SDK 2025-03-07')) {
-                    throw "Baseline SDK reference missing in $relative; inspect the migration."
+                if ($original.Contains('SDK 2025-03-07')) {
+                    Set-Content -LiteralPath $path -Value $original.Replace('SDK 2025-03-07','SDK 2026-10-01') -NoNewline -Encoding utf8
+                } elseif (-not $original.Contains('SDK 2026-10-01')) {
+                    throw "Unexpected SDK reference in $relative; inspect the migration."
                 }
-                Set-Content -LiteralPath $path -Value $original.Replace('SDK 2025-03-07','SDK 2026-10-01') -NoNewline -Encoding utf8
             }
             $validator = Join-Path $workspace 'validate_template.ps1'
             $originalValidator = Get-Content -LiteralPath $validator -Raw
             $oldPin = "$" + "expectedSdkVersion = '2025-03-07'"
             $newPin = "$" + "expectedSdkVersion = '2026-10-01'"
-            if (-not $originalValidator.Contains($oldPin)) { throw 'Baseline validator pin not found.' }
-            Set-Content -LiteralPath $validator -Value $originalValidator.Replace($oldPin,$newPin) -NoNewline -Encoding utf8
+            if ($originalValidator.Contains($oldPin)) {
+                Set-Content -LiteralPath $validator -Value $originalValidator.Replace($oldPin,$newPin) -NoNewline -Encoding utf8
+            } elseif (-not $originalValidator.Contains($newPin)) {
+                throw 'Neither old nor upgraded SDK validator pin was found.'
+            }
 
             Push-Location $workspace
             try {
