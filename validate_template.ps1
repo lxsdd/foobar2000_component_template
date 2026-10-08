@@ -31,8 +31,21 @@ foreach ($requiredIgnore in @('Debug FB2K/', 'Release FB2K/')) {
 }
 
 $sdkReadme = Get-Content -LiteralPath (Join-Path $root 'vendor\sdk\sdk-readme.html') -Raw
-if ($sdkReadme -notmatch '2025-03-07') {
-    throw 'Unexpected foobar2000 SDK snapshot.'
+$sdkVersionMatch = [regex]::Match($sdkReadme, 'foobar2000 SDK, version (\d{4}-\d{2}-\d{2})')
+if (-not $sdkVersionMatch.Success) {
+    throw 'SDK readme has no recognizable version.'
+}
+$sdkVersion = $sdkVersionMatch.Groups[1].Value
+# Pin the actual vendored snapshot, not a claimed version in documentation.
+$expectedSdkVersion = '2025-03-07'
+if ($sdkVersion -ne $expectedSdkVersion) {
+    throw "Unexpected foobar2000 SDK snapshot: $sdkVersion (expected $expectedSdkVersion)."
+}
+foreach ($relative in @('README.md', 'template\README.md')) {
+    $readme = Get-Content -LiteralPath (Join-Path $root $relative) -Raw
+    if (-not $readme.Contains("SDK $sdkVersion")) {
+        throw "SDK version mismatch: $relative does not describe the actual vendored SDK $sdkVersion."
+    }
 }
 
 $forbiddenArtifactExtensions = @('.aps', '.dll', '.exp', '.iobj', '.ipdb', '.lib', '.obj', '.pch', '.pdb', '.tlog')
