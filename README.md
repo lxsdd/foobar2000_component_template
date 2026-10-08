@@ -45,6 +45,10 @@ The destination must be absent or empty. The generator validates its result and 
 
 The first command generates two projects and verifies identity isolation. The second additionally performs Win32/x64 release builds and packages a disposable probe component.
 
+## Mandatory storage-friendly writes
+
+Generated components that change physical tags, ReplayGain, embedded/external cuesheets or files **must not perform any write** when the approved destination representation already exists. This includes avoiding needless file timestamps and resaving unchanged files. Verify complete physical metadata and CUE byte equivalence, re-check the live host state immediately before mutation, and test zero writer-call behavior. The template has no media writer itself; this is a mandatory safety/quality contract for product code. See `TEMPLATE_CONTRACT.md`.
+
 ## Required project workflow
 
 1. Generate the new repository from this template.
