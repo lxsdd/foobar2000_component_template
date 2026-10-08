@@ -70,6 +70,12 @@ try {
                 throw "Probe package contains unexpected DLLs: $($unexpectedDll -join ', ')"
             }
 
+            $peProof = & (Join-Path $root 'ci\verify-fb2k-component.ps1') -ComponentPath $package -DllName 'foo_template_probe.dll'
+            if ($null -eq $peProof -or $peProof.Status -ne 'PASS') {
+                throw 'Combined component PE architecture/hash verification failed.'
+            }
+            Write-Host "Package machine proof: Win32=$($peProof.RootMachine) x64=$($peProof.X64Machine) SHA256=$($peProof.Sha256)"
+
             $statusAfterBuild = @(& git -C $first status --porcelain=v1)
             if (($statusAfterBuild -join "`n") -ne ($statusBeforeBuild -join "`n")) {
                 $newStatus = @($statusAfterBuild | Where-Object { $_ -notin $statusBeforeBuild })

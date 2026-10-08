@@ -1,0 +1,7 @@
+{
+  "sdk_version": "2026-10-01",
+  "upstream_url": "https://www.foobar2000.org/downloads/SDK-2026-10-01.7z",
+  "upstream_archive_sha256": "d4c55077336fae81bf8df0259b5b2748fa45ea84132c656ead93eb123cbcdc26",
+  "archive_size_bytes": 793738,
+  "captured_utc": "2026-10-08T15:03:06.8377138Z"
+}
