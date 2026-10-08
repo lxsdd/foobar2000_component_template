@@ -74,10 +74,10 @@ try {
         if ($mirrorRoots.Count -ne 1) { throw "Expected one immutable mirror root, found $($mirrorRoots.Count)." }
         $mirrorRoot = $mirrorRoots[0].FullName
 
-        $upstreamPaths = @(Get-ChildItem -LiteralPath $sdkRoot -Recurse -File |
+        $upstreamPaths = @(Get-ChildItem -LiteralPath $sdkRoot -Recurse -File -Force |
             ForEach-Object { [IO.Path]::GetRelativePath($sdkRoot, $_.FullName).Replace('\', '/') } |
             Sort-Object)
-        $mirrorPaths = @(Get-ChildItem -LiteralPath $mirrorRoot -Recurse -File |
+        $mirrorPaths = @(Get-ChildItem -LiteralPath $mirrorRoot -Recurse -File -Force |
             ForEach-Object { [IO.Path]::GetRelativePath($mirrorRoot, $_.FullName).Replace('\', '/') } |
             Sort-Object)
         if ($upstreamPaths.Count -ne $mirrorPaths.Count) {
