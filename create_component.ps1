@@ -40,7 +40,7 @@ if ($DisplayName -match '["\r\n]' -or $Description -match '["\r\n]') {
 }
 
 $versionParts = @($Version.Split('.') | ForEach-Object { [int]$_ })
-if ($versionParts.Count -ne 3 -or ($versionParts | Where-Object { $_ -gt 65535 }).Count -gt 0) {
+if ($versionParts.Count -ne 3 -or @($versionParts | Where-Object { $_ -gt 65535 }).Count -gt 0) {
     throw 'Version components must be between 0 and 65535.'
 }
 $versionCommas = "$($versionParts[0]),$($versionParts[1]),$($versionParts[2]),0"
