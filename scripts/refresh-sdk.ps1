@@ -20,6 +20,11 @@ try {
         throw "Downloaded SDK archive is implausibly small."
     }
     $archiveSha256 = (Get-FileHash -LiteralPath $archive -Algorithm SHA256).Hash.ToLowerInvariant()
+    # Frozen from the successful official-archive provenance run (2026-10-08).
+    $expectedSha256 = 'd4c55077336fae81bf8df0259b5b2748fa45ea84132c656ead93eb123cbcdc26'
+    if ($archiveSha256 -ne $expectedSha256) {
+        throw "Official SDK archive SHA-256 mismatch: $archiveSha256 (expected $expectedSha256)"
+    }
     $sevenZipCommand = Get-Command 7z.exe -ErrorAction SilentlyContinue
     $sevenZip = if ($sevenZipCommand) { $sevenZipCommand.Source } else { 'C:\Program Files\7-Zip\7z.exe' }
     if (-not (Test-Path -LiteralPath $sevenZip)) { throw "7-Zip not installed: $sevenZip" }
