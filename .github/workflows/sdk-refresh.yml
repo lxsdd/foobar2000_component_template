@@ -1,0 +1,25 @@
+name: Stage foobar2000 SDK 2026-10-01
+
+on:
+  push:
+    branches:
+      - sdk/2026-10-01
+    paths:
+      - scripts/refresh-sdk.ps1
+      - .github/workflows/sdk-refresh.yml
+
+permissions:
+  contents: write
+
+jobs:
+  stage-official-sdk:
+    runs-on: windows-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out isolated migration branch
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: true
+      - name: Download, verify and commit official SDK snapshot
+        shell: pwsh
+        run: ./scripts/refresh-sdk.ps1 -Version 2026-10-01
