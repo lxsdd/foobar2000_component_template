@@ -2,7 +2,8 @@
 param(
     [ValidatePattern('^[0-9a-fA-F]{64}$')]
     [string]$ExpectedSHA256 = '',
-    [switch]$Build
+    [switch]$Build,
+    [switch]$VerifyMirror
 )
 
 $ErrorActionPreference = 'Stop'
@@ -13,14 +14,16 @@ $evidenceRoot = Join-Path $repositoryRoot 'sdk-probe-evidence'
 New-Item -ItemType Directory -Path $evidenceRoot -Force | Out-Null
 $reportPath = Join-Path $evidenceRoot 'report.txt'
 $archiveUrl = 'https://www.foobar2000.org/downloads/SDK-2026-10-01.7z'
+$mirrorCommit = '9e4823ee802dfb704de1ce42401b48b407a54180'
+$mirrorUrl = "https://github.com/reupen/foobar2000-sdk-unmodified/archive/$mirrorCommit.zip"
 $archive = Join-Path $env:RUNNER_TEMP 'foobar2000-SDK-2026-10-01.7z'
 $extractRoot = Join-Path $env:RUNNER_TEMP 'foobar2000-SDK-2026-10-01-extract'
 
 if ([string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
     throw 'RUNNER_TEMP is required: run only in an ephemeral GitHub Windows runner.'
 }
-if ($Build -and -not $ExpectedSHA256) {
-    throw 'Build blocked: official archive SHA-256 must be reviewed and pinned first.'
+if ($Build -and -not $ExpectedSHA256 -and -not $VerifyMirror) {
+    throw 'Build blocked: require verified SHA-256 or byte-for-byte matching immutable mirror commit.'
 }
 
 $lines = [System.Collections.Generic.List[string]]::new()
@@ -59,16 +62,55 @@ try {
     $lines.Add('SOURCE_INTEGRITY=PASS')
     $lines.Add('SOURCE_LAYOUT=PASS')
 
-    if (-not $ExpectedSHA256) {
+    if ($VerifyMirror) {
+        $mirrorArchive = Join-Path $env:RUNNER_TEMP 'sdk-github-mirror.zip'
+        $mirrorExtractRoot = Join-Path $env:RUNNER_TEMP 'sdk-github-mirror-extracted'
+        Invoke-WebRequest -Uri $mirrorUrl -OutFile $mirrorArchive -MaximumRedirection 5
+        if (Test-Path -LiteralPath $mirrorExtractRoot) {
+            Remove-Item -LiteralPath $mirrorExtractRoot -Recurse -Force
+        }
+        Expand-Archive -LiteralPath $mirrorArchive -DestinationPath $mirrorExtractRoot -Force
+        $mirrorRoots = @(Get-ChildItem -LiteralPath $mirrorExtractRoot -Directory)
+        if ($mirrorRoots.Count -ne 1) { throw "Expected one immutable mirror root, found $($mirrorRoots.Count)." }
+        $mirrorRoot = $mirrorRoots[0].FullName
+
+        $upstreamPaths = @(Get-ChildItem -LiteralPath $sdkRoot -Recurse -File |
+            ForEach-Object { [IO.Path]::GetRelativePath($sdkRoot, $_.FullName).Replace('\', '/') } |
+            Sort-Object)
+        $mirrorPaths = @(Get-ChildItem -LiteralPath $mirrorRoot -Recurse -File |
+            ForEach-Object { [IO.Path]::GetRelativePath($mirrorRoot, $_.FullName).Replace('\', '/') } |
+            Sort-Object)
+        if ($upstreamPaths.Count -ne $mirrorPaths.Count) {
+            throw "Official SDK and mirror have different file counts: $($upstreamPaths.Count) vs $($mirrorPaths.Count)."
+        }
+        for ($i = 0; $i -lt $upstreamPaths.Count; $i++) {
+            $relative = $upstreamPaths[$i]
+            if ($relative -cne $mirrorPaths[$i]) {
+                throw "Official SDK and mirror have different file paths: $relative vs $($mirrorPaths[$i])."
+            }
+            $officialHash = (Get-FileHash -LiteralPath (Join-Path $sdkRoot $relative) -Algorithm SHA256).Hash
+            $mirrorHash = (Get-FileHash -LiteralPath (Join-Path $mirrorRoot $relative) -Algorithm SHA256).Hash
+            if ($officialHash -ne $mirrorHash) {
+                throw "Official SDK and immutable mirror differ at: $relative"
+            }
+        }
+        $lines.Add("MIRROR_COMMIT=$mirrorCommit")
+        $lines.Add("MATCHING_SOURCE_FILES=$($upstreamPaths.Count)")
+        $lines.Add('OFFICIAL_VS_MIRROR_HASH_CHECK=PASS')
+    }
+
+    if (-not $ExpectedSHA256 -and -not $VerifyMirror) {
         $lines.Add('SDK_PROBE_STATUS=SOURCE_DISCOVERY_ONLY')
         $lines.Add('BUILD_STATUS=NOT_RUN_UNPINNED_ARCHIVE')
         Write-Host "Discovered upstream SDK 2026-10-01; SHA256=$hash"
         Write-Host 'Review this SHA-256 against the independently obtained official archive before enabling -Build.'
     } else {
-        if ($hash -ne $ExpectedSHA256.ToLowerInvariant()) {
-            throw "Archive SHA-256 mismatch: expected $ExpectedSHA256, received $hash."
+        if ($ExpectedSHA256) {
+            if ($hash -ne $ExpectedSHA256.ToLowerInvariant()) {
+                throw "Archive SHA-256 mismatch: expected $ExpectedSHA256, received $hash."
+            }
+            $lines.Add('SOURCE_SHA256_PIN=PASS')
         }
-        $lines.Add('SOURCE_SHA256_PIN=PASS')
         if ($Build) {
             $workspace = Join-Path $env:RUNNER_TEMP 'foobar2000-sdk-upgrade-probe'
             if (Test-Path -LiteralPath $workspace) { Remove-Item -LiteralPath $workspace -Recurse -Force }
