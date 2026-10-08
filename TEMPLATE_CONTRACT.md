@@ -21,6 +21,8 @@
 
 ## Invariants
 
+- Every generated component implementing writes must check the *live approved postimage* immediately before a write-capable foobar SDK call and perform **zero writes** if unchanged. Compare physical textual tags, ReplayGain, CUE bytes, artwork/sidecars, metadata-only changes and file operations separately. Do not update file timestamps for no-op operations. A partial virtual subsong `file_info` is not proof of complete physical tags. Add regression tests proving zero writer calls, not merely final equality. See the canonical `dev-infrastructure/STANDARDS/FOOBAR2000-NOOP-WRITES.md` policy (internal).
+
 - A generated project never references the template or Smart Tempo at build time.
 - A generated project owns its SDK/WTL snapshot and Git history.
 - Persistent and service GUIDs are never copied between components.
