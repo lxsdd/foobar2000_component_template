@@ -32,3 +32,8 @@ The package is written to `build\<component-id>_<version>.fb2k-component` and co
 - Run the validator, both release builds and packaging before tagging a release.
 
 See [Architecture](docs/ARCHITECTURE.md), [Building](docs/BUILDING.md) and the [Release checklist](docs/RELEASE_CHECKLIST.md).
+
+
+### Resizable dialogs
+
+The generated Preferences example is a minimal UI sample; the DPI helper alone is not a complete resize/persistence implementation. Any additional resizable dialog must pass the native foobar window policy in `lxsdd/dev-infrastructure/STANDARDS/FOOBAR2000-NATIVE-DIALOGS.md` (real HWND placement, no overlapping controls/painting ghosts, per-window profile-backed geometry, real host resize/reopen tests). Do not reuse another component's cfg GUIDs.
