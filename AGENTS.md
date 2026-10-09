@@ -25,3 +25,8 @@ For dual-architecture components, the combined `.fb2k-component` layout is bindi
 - final package SHA-256 must be emitted and commit-bound.
 
 Do not create a competing packaging policy here; follow the canonical standard in `lxsdd/dev-infrastructure/STANDARDS/FOOBAR2000-COMPONENT.md`.
+
+
+## Future generated GUI window contract
+
+All new project dialog designs follow `lxsdd/dev-infrastructure/STANDARDS/FOOBAR2000-NATIVE-DIALOGS.md`. A DPI helper alone does not make dynamic Win32 dialogs collision-free. Require actual native resource-backed expansion/shrink tests, using the Windows-granted rather than requested client dimensions, and native foobar cfg window geometry persistence with real host verification. Existing generated projects and older binaries must be individually audited; this template policy is not evidence that they were patched.
