@@ -15,6 +15,9 @@
 - [ ] Native ListView selected-detail tests insert a real row and read back **all subitems** (Field, Original, Proposed, Status), verify adequate caption/header spacing and complete visible labels/headers.
 - [ ] Double-click/Enter on a verified result invokes the same guarded read-only action as the explicit load button. Never activate on stale source selection or a loaded result.
 - [ ] If a browser window is long-running, prefer a nonblocking **modeless** window with minimize/restore; never add Minimize to an otherwise owner-blocking modal dialog as a purported workaround. Modeless lifetime, one-instance policy, foobar app shutdown and keyboard navigation require separate SDK/real-host qualification.
+- [ ] For modeless windows, check `CreateDialogParamW`, `modeless_dialog_manager::g_add/g_remove` pairing, HWND-state ownership until `WM_NCDESTROY`, failed-init cleanup, `initquit` teardown and same-window reactivation. Native HWND tests verify Tab through `IsDialogMessage`, independent taskbar/Alt-Tab, minimize/maximize/restore and Close; installed foobar proves playlist/playback are not blocked.
+- [ ] A changed playlist/track selection does not replace pending comparisons without consent. Before each action, stale physical metadata, file identity, CUE and rules snapshots fail closed. Explicit refresh discards old decisions and online candidates. No background provider lookups or media writes.
+
 
 - [ ] UI is checked in light and dark mode at 100, 125, 150 and 200 percent DPI.
 - [ ] Keyboard navigation, focus order, tooltips and cancellation behavior are checked.
