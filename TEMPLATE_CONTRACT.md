@@ -8,6 +8,7 @@
 - Unique GUID generation
 - Minimal persistent preferences example
 - Native dialog, keyboard, dark-mode and DPI baseline
+- Mandatory cross-project **resizable native foobar window** qualification: stable per-window foobar cfg geometry; actual OS-clamped WM_SIZE client deltas; coordinated collision-free sibling layout with proper repaint; real HWND/UI tests and installed-host close/reopen acceptance (canonical policy: `lxsdd/dev-infrastructure/STANDARDS/FOOBAR2000-NATIVE-DIALOGS.md`).
 - Structural validation and disposable smoke tests
 - Build and release documentation
 
@@ -27,5 +28,6 @@
 - A generated project owns its SDK/WTL snapshot and Git history.
 - Persistent and service GUIDs are never copied between components.
 - Generic template changes are validated by two-project identity tests and one complete build/package smoke test.
+- Template-provided simple Preferences panels do not imply every generated component already contains an atomic resize adapter. Projects that **introduce resizable dialogs** must implement and qualify one before release; do not copy product-specific GUIDs/Win32 geometry blindly.
 - Project-specific fixes are not backported unless they are demonstrably generic.
 
