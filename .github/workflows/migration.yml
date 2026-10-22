@@ -23,6 +23,7 @@ jobs:
         run: |
           $ErrorActionPreference='Stop'
           ./tests/test_template.ps1
+          ./tests/test-verifier-contract.ps1
           ./create_component.ps1 -ComponentId foo_ci_probe -DisplayName 'CI Probe' -Description 'Cloud template qualification' -Destination ci-probe -SkipGitInit
           foreach($platform in @('Win32','x64')) {
             & msbuild 'ci-probe/component.sln' /t:Build /p:Configuration=Release /p:Platform=$platform /p:PlatformToolset=v145 /p:LanguageStandard=stdcpp23 /m:2 /verbosity:minimal
