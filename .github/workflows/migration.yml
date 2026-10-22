@@ -32,8 +32,8 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
         shell: pwsh
         run: ./ci/package.ps1 -BuildRoot ci-probe -ComponentId foo_ci_probe
-      - name: Upload manual probe
-        if: github.event_name == 'workflow_dispatch'
+      - name: Upload manual probe (held, source-only repository)
+        if: false # Public native component distribution unapproved
         uses: actions/upload-artifact@v7
         with:
           name: foo_ci_probe-${{ github.sha }}
